@@ -1,4 +1,4 @@
-tank
+Tank
 ====
 
-Juego de tanque para dos personas
+Juego de tanque para dos personas.
