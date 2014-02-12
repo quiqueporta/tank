@@ -13,8 +13,11 @@ class Tanque(Actor):
         # Obtenemos la imagen del tanque.
         imagen_tanque = pilas.imagenes.cargar_imagen("images/tanque.png")
 
+        x = random.randrange(-320, 320)
+        y = random.randrange(-240, 240)
+
         # Iniciamos el actor con la imagen del tanque.
-        Actor.__init__(self, imagen_tanque)
+        Actor.__init__(self, imagen_tanque, x=x, y=y)
 
         # Establecemos la habilidad de disparar al tanque.
         self.aprender(pilas.habilidades.Disparar,
@@ -31,15 +34,25 @@ class Tanque(Actor):
         # Habilidad para que nunca desaparezca de la pantalla.
         self.aprender(pilas.habilidades.SeMantieneEnPantalla)
 
+        self.aprender(pilas.habilidades.PuedeExplotar)
+
         self.tiene_bomba = False
+
+        self.vidas = pilas.actores.Puntaje(3, x=-200)
 
     def definir_enemigo(self, enemigo):
         self.habilidades.Disparar.definir_colision(enemigo, self.impacto)
         self.enemigo = enemigo
 
-    def impacto(self, proyectil, tanque):
+    def impacto(self, proyectil, enemigo):
         proyectil.eliminar()
         pilas.actores.Humo(proyectil.x, proyectil.y)
+        enemigo.quitar_vida()
+
+    def quitar_vida(self):
+        self.vidas.reducir(1)
+        if self.vidas.obtener() <= 0:
+            self.eliminar()
 
     def plantar_bomba(self):
         if self.tiene_bomba:
