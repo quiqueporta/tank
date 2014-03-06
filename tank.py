@@ -8,10 +8,10 @@ from pilas.actores import Actor
 
 class Tanque(Actor):
 
-    def __init__(self, control):
+    def __init__(self, control, imagen="images/tanque.png"):
 
         # Obtenemos la imagen del tanque.
-        imagen_tanque = pilas.imagenes.cargar_imagen("images/tanque.png")
+        imagen_tanque = pilas.imagenes.cargar_imagen(imagen)
 
         x = random.randrange(-320, 320)
         y = random.randrange(-240, 240)
@@ -83,13 +83,15 @@ class Escena_Juego(Normal):
                                  pilas.simbolos.ABAJO,
                                  pilas.simbolos.IZQUIERDA,
                                  pilas.simbolos.DERECHA,
-                                 pilas.simbolos.ALTGR)
+                                 pilas.simbolos.ALTGR,
+                                 "images/tanque.png")
 
         self.tanque_J2 = self.crear_tanque(pilas.simbolos.w,
                                  pilas.simbolos.s,
                                  pilas.simbolos.a,
                                  pilas.simbolos.d,
-                                 pilas.simbolos.SHIFT)
+                                 pilas.simbolos.SHIFT,
+                                 "images/tanque2.png")
 
         self.tanque_J1.definir_enemigo(self.tanque_J2)
         self.tanque_J2.definir_enemigo(self.tanque_J1)
@@ -99,14 +101,14 @@ class Escena_Juego(Normal):
 
         self.hay_bomba_en_juego = False
 
-    def crear_tanque(self, arriba, abajo, izquierda, derecha, disparo):
+    def crear_tanque(self, arriba, abajo, izquierda, derecha, disparo, imagen):
         teclas = {izquierda: 'izquierda',
                   derecha: 'derecha',
                   arriba: 'arriba',
                   abajo: 'abajo',
                   disparo: 'boton'}
         control = pilas.control.Control(pilas.escena_actual(), teclas)
-        tanque = Tanque(control)
+        tanque = Tanque(control, imagen)
         return tanque
 
     def crear_bomba(self):
