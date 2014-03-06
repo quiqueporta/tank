@@ -80,7 +80,7 @@ class Escena_Juego(Normal):
         # Cargamos el fondo del juego.
         pilas.fondos.Pasto()
 
-        self.vidas_J1 = pilas.actores.Puntaje(3, x=-200)
+        self.vidas_J1 = pilas.actores.Puntaje(3, x=200)
         self.tanque_J1 = self.crear_tanque(pilas.simbolos.ARRIBA,
                                            pilas.simbolos.ABAJO,
                                            pilas.simbolos.IZQUIERDA,
@@ -89,7 +89,7 @@ class Escena_Juego(Normal):
                                            "images/tanque.png",
                                            self.vidas_J1)
 
-        self.vidas_J2 = pilas.actores.Puntaje(3, x=200)
+        self.vidas_J2 = pilas.actores.Puntaje(3, x=-200)
         self.tanque_J2 = self.crear_tanque(pilas.simbolos.w,
                                            pilas.simbolos.s,
                                            pilas.simbolos.a,
@@ -101,9 +101,7 @@ class Escena_Juego(Normal):
         self.tanque_J1.definir_enemigo(self.tanque_J2)
         self.tanque_J2.definir_enemigo(self.tanque_J1)
 
-        pilas.escena_actual().tareas.siempre(15, self.crear_bomba)
-
-        self.actualizar.conectar(self.comprobar_ganador)
+        self.tareas.siempre(15, self.crear_bomba)
 
     def crear_tanque(self, arriba, abajo, izquierda, derecha, disparo, imagen,
                      puntaje):
@@ -122,7 +120,7 @@ class Escena_Juego(Normal):
         y = random.randrange(-240, 240)
         bomba = pilas.actores.Bomba(x, y)
         bomba.escala = 0.5
-        pilas.escena_actual().colisiones.agregar(
+        self.colisiones.agregar(
             [self.tanque_J1, self.tanque_J2],
             bomba,
             self.obtener_bomba)
@@ -130,9 +128,6 @@ class Escena_Juego(Normal):
     def obtener_bomba(self, tanque, bomba):
         tanque.tiene_bomba = True
         bomba.destruir()
-
-    def comprobar_ganador(self, evento):
-        pass
 
 pilas.iniciar()
 
