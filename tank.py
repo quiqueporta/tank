@@ -8,7 +8,7 @@ from pilas.actores import Actor
 
 class Tanque(Actor):
 
-    def __init__(self, control, imagen="images/tanque.png"):
+    def __init__(self, control, imagen, puntaje):
 
         # Obtenemos la imagen del tanque.
         imagen_tanque = pilas.imagenes.cargar_imagen(imagen)
@@ -38,7 +38,7 @@ class Tanque(Actor):
 
         self.tiene_bomba = False
 
-        self.vidas = pilas.actores.Puntaje(3, x=-200)
+        self.vidas = puntaje
 
     def definir_enemigo(self, enemigo):
         self.habilidades.Disparar.definir_colision(enemigo, self.impacto)
@@ -69,6 +69,7 @@ class Tanque(Actor):
         bomba.eliminar()
         tanque.eliminar()
 
+
 class Escena_Juego(Normal):
     """ Escena principal del juego. """
 
@@ -79,56 +80,59 @@ class Escena_Juego(Normal):
         # Cargamos el fondo del juego.
         pilas.fondos.Pasto()
 
+        self.vidas_J1 = pilas.actores.Puntaje(3, x=-200)
         self.tanque_J1 = self.crear_tanque(pilas.simbolos.ARRIBA,
-                                 pilas.simbolos.ABAJO,
-                                 pilas.simbolos.IZQUIERDA,
-                                 pilas.simbolos.DERECHA,
-                                 pilas.simbolos.ALTGR,
-                                 "images/tanque.png")
+                                           pilas.simbolos.ABAJO,
+                                           pilas.simbolos.IZQUIERDA,
+                                           pilas.simbolos.DERECHA,
+                                           pilas.simbolos.ALTGR,
+                                           "images/tanque.png",
+                                           self.vidas_J1)
 
+        self.vidas_J2 = pilas.actores.Puntaje(3, x=200)
         self.tanque_J2 = self.crear_tanque(pilas.simbolos.w,
-                                 pilas.simbolos.s,
-                                 pilas.simbolos.a,
-                                 pilas.simbolos.d,
-                                 pilas.simbolos.SHIFT,
-                                 "images/tanque2.png")
+                                           pilas.simbolos.s,
+                                           pilas.simbolos.a,
+                                           pilas.simbolos.d,
+                                           pilas.simbolos.SHIFT,
+                                           "images/tanque2.png",
+                                           self.vidas_J2)
 
         self.tanque_J1.definir_enemigo(self.tanque_J2)
         self.tanque_J2.definir_enemigo(self.tanque_J1)
 
+        pilas.escena_actual().tareas.siempre(15, self.crear_bomba)
 
-        pilas.escena_actual().tareas.siempre(20, self.crear_bomba)
+        self.actualizar.conectar(self.comprobar_ganador)
 
-        self.hay_bomba_en_juego = False
+    def crear_tanque(self, arriba, abajo, izquierda, derecha, disparo, imagen,
+                     puntaje):
 
-    def crear_tanque(self, arriba, abajo, izquierda, derecha, disparo, imagen):
         teclas = {izquierda: 'izquierda',
                   derecha: 'derecha',
                   arriba: 'arriba',
                   abajo: 'abajo',
                   disparo: 'boton'}
         control = pilas.control.Control(pilas.escena_actual(), teclas)
-        tanque = Tanque(control, imagen)
+        tanque = Tanque(control, imagen, puntaje)
         return tanque
 
     def crear_bomba(self):
-        if not self.hay_bomba_en_juego:
-            x = random.randrange(-320, 320)
-            y = random.randrange(-240, 240)
-            bomba = pilas.actores.Bomba(x,y)
-            bomba.escala = 0.5
-            pilas.escena_actual().colisiones.agregar(
-                [self.tanque_J1, self.tanque_J2],
-                bomba,
-                self.obtener_bomba)
-            self.hay_bomba_en_juego = True
+        x = random.randrange(-320, 320)
+        y = random.randrange(-240, 240)
+        bomba = pilas.actores.Bomba(x, y)
+        bomba.escala = 0.5
+        pilas.escena_actual().colisiones.agregar(
+            [self.tanque_J1, self.tanque_J2],
+            bomba,
+            self.obtener_bomba)
 
     def obtener_bomba(self, tanque, bomba):
         tanque.tiene_bomba = True
         bomba.destruir()
-        self.hay_bomba_en_juego = False
 
-
+    def comprobar_ganador(self, evento):
+        pass
 
 pilas.iniciar()
 
