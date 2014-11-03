@@ -53,8 +53,8 @@ class Tanque(Actor):
         pilas.actores.Humo(proyectil.x, proyectil.y)
         enemigo.quitar_vida()
 
-    def quitar_vida(self):
-        self.vidas.reducir(1)
+    def quitar_vida(self, cantidad=1):
+        self.vidas.reducir(cantidad)
         if self.vidas.obtener() <= 0:
             self.eliminar()
 
@@ -67,12 +67,11 @@ class Tanque(Actor):
 
             pilas.escena_actual().colisiones.agregar(self.enemigo,
                                                      bomba,
-                                                     self.destruir_enemigo)
+                                                     self.impacto_bomba)
 
-    def destruir_enemigo(self, tanque, bomba):
+    def impacto_bomba(self, tanque, bomba):
         bomba.eliminar()
-        tanque.vidas.definir(0)
-        tanque.eliminar()
+        tanque.quitar_vida(2)
 
 
 class Escena_Juego(Normal):
@@ -85,7 +84,13 @@ class Escena_Juego(Normal):
         # Cargamos el fondo del juego.
         pilas.fondos.Pasto()
 
-        self.vidas_J1 = pilas.actores.Puntaje(3, x=200)
+        VIDAS_INICIALES = 3
+
+        self.vidas_J1 = pilas.actores.Puntaje(VIDAS_INICIALES, x=250, y=200,
+                                              color=pilas.colores.blanco)
+        texto_J1 = pilas.actores.Texto("Verde:", x=200, y=200)
+        texto_J1.definir_color(pilas.colores.blanco)
+
         self.tanque_J1 = self.crear_tanque(pilas.simbolos.ARRIBA,
                                            pilas.simbolos.ABAJO,
                                            pilas.simbolos.IZQUIERDA,
@@ -94,7 +99,11 @@ class Escena_Juego(Normal):
                                            "images/tanque.png",
                                            self.vidas_J1)
 
-        self.vidas_J2 = pilas.actores.Puntaje(3, x=-200)
+        texto_J2 = pilas.actores.Texto("Rojo:", x=-250, y=200)
+        texto_J2.definir_color(pilas.colores.blanco)
+
+        self.vidas_J2 = pilas.actores.Puntaje(VIDAS_INICIALES, x=-200, y=200,
+                                              color=pilas.colores.blanco)
         self.tanque_J2 = self.crear_tanque(pilas.simbolos.w,
                                            pilas.simbolos.s,
                                            pilas.simbolos.a,
@@ -134,8 +143,33 @@ class Escena_Juego(Normal):
         tanque.tiene_bomba = True
         bomba.destruir()
 
+
+class Escena_Menu(Normal):
+    """ Escena del menú del juego. """
+
+    def __init__(self):
+        super(Escena_Menu, self).__init__()
+
+    def iniciar_juego(self):
+        pilas.cambiar_escena(Escena_Juego())
+
+    def salir_del_juego(self):
+        import sys
+        sys.exit(0)
+
+    def iniciar(self):
+        # Cargamos el fondo del juego.
+        pilas.fondos.Tarde()
+
+        opciones = [
+            ('Iniciar Juego', self.iniciar_juego),
+            ('Salir', self.salir_del_juego),
+        ]
+
+        pilas.actores.Menu(opciones)
+
 pilas.iniciar()
 
-pilas.cambiar_escena(Escena_Juego())
+pilas.cambiar_escena(Escena_Menu())
 
 pilas.ejecutar()
