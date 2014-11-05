@@ -9,9 +9,6 @@ from pilas.escena import Normal
 class Escena_Juego(Normal):
     """ Escena principal del juego. """
 
-    def __init__(self):
-        super(Escena_Juego, self).__init__()
-
     def iniciar(self):
         # Cargamos el fondo del juego.
         pilas.fondos.Pasto()
@@ -19,9 +16,6 @@ class Escena_Juego(Normal):
 
 class Escena_Menu(Normal):
     """ Escena del menú del juego. """
-
-    def __init__(self):
-        super(Escena_Menu, self).__init__()
 
     def iniciar_juego(self):
         pilas.cambiar_escena(Escena_Juego())

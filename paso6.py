@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 #
-# Creamos los marcadores de vidas y restamos vida con impacto.
+# Añadimos nuevos items para recoger.
 
 import random
 
@@ -25,7 +25,8 @@ class Tanque(Actor):
         # Establecemos la habilidad de disparar al tanque.
         self.aprender(pilas.habilidades.Disparar,
                       control=control,
-                      frecuencia_de_disparo=2)
+                      frecuencia_de_disparo=2,
+                      cuando_dispara=self.plantar_bomba)
 
         # Establecemos la habilidad de moverse.
         self.aprender(pilas.habilidades.MoverseComoCoche,
@@ -41,6 +42,8 @@ class Tanque(Actor):
 
         self.vidas = vidas
 
+        self.tiene_bomba = False
+
     def definir_enemigo(self, enemigo):
         self.habilidades.Disparar.definir_colision(enemigo, self.impacto)
         self.enemigo = enemigo
@@ -54,6 +57,21 @@ class Tanque(Actor):
         self.vidas.reducir(cantidad)
         if self.vidas.obtener() <= 0:
             self.eliminar()
+
+    def plantar_bomba(self):
+        if self.tiene_bomba:
+            bomba = pilas.actores.Bomba(x=self.x, y=self.y)
+            bomba.escala = 0.5
+
+            self.tiene_bomba = False
+
+            pilas.escena_actual().colisiones.agregar(self.enemigo,
+                                                     bomba,
+                                                     self.impacto_bomba)
+
+    def impacto_bomba(self, tanque, bomba):
+        bomba.eliminar()
+        tanque.quitar_vida(2)
 
 
 class Escena_Juego(Normal):
@@ -94,6 +112,26 @@ class Escena_Juego(Normal):
         self.tanque_J1.definir_enemigo(self.tanque_J2)
         self.tanque_J2.definir_enemigo(self.tanque_J1)
 
+        self.tareas.siempre(15, self.crear_bomba)
+
+        self.tareas.siempre(15, self.crear_estrella)
+
+        pilas.eventos.actualizar.conectar(self.comprobar_ganador)
+
+    def comprobar_ganador(self, evento):
+
+        if self.tanque_J1.vidas.obtener() == 0:
+            self.efecto_ganador(self.tanque_J2)
+
+        if self.tanque_J2.vidas.obtener() == 0:
+            self.efecto_ganador(self.tanque_J1)
+
+    def efecto_ganador(self, ganador):
+        ganador.x = 0
+        ganador.y = 0
+        ganador.escala = [3]
+        ganador.rotacion = [360]
+
     def crear_tanque(self, arriba, abajo, izquierda, derecha, disparo, imagen,
                      vidas):
 
@@ -105,6 +143,38 @@ class Escena_Juego(Normal):
         control = pilas.control.Control(pilas.escena_actual(), teclas)
         tanque = Tanque(control, imagen, vidas)
         return tanque
+
+    def crear_bomba(self):
+        x = random.randrange(-320, 320)
+        y = random.randrange(-240, 240)
+        bomba = pilas.actores.Bomba(x, y)
+        bomba.escala = 0.5
+        self.colisiones.agregar(
+            [self.tanque_J1, self.tanque_J2],
+            bomba,
+            self.obtener_bomba)
+
+    def obtener_bomba(self, tanque, bomba):
+        tanque.tiene_bomba = True
+        bomba.destruir()
+
+    def crear_estrella(self):
+        x = random.randrange(-320, 320)
+        y = random.randrange(-240, 240)
+        estrella = pilas.actores.Estrella(x, y)
+        estrella.escala = 0.4
+        self.colisiones.agregar(
+            [self.tanque_J1, self.tanque_J2],
+            estrella,
+            self.aumentar_velocidad)
+
+    def aumentar_velocidad(self, tanque, estrella):
+        estrella.eliminar()
+        tanque.habilidades.MoverseComoCoche.set_velocidad_maxima(4)
+        self.tareas.una_vez(5, self.reducir_velocidad, [tanque])
+
+    def reducir_velocidad(self, tanque):
+        tanque.habilidades.MoverseComoCoche.set_velocidad_maxima(2)
 
 
 class Escena_Menu(Normal):

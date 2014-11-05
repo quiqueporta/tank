@@ -20,7 +20,7 @@ class Tanque(Actor):
         y = random.randrange(-240, 240)
 
         # Iniciamos el actor con la imagen del tanque.
-        Actor.__init__(self, imagen_tanque, x=x, y=y)
+        super(Tanque, self).__init__(imagen_tanque, x=x, y=y)
 
         # Establecemos la habilidad de disparar al tanque.
         self.aprender(pilas.habilidades.Disparar,
@@ -76,9 +76,6 @@ class Tanque(Actor):
 
 class Escena_Juego(Normal):
     """ Escena principal del juego. """
-
-    def __init__(self):
-        Normal.__init__(self)
 
     def iniciar(self):
         # Cargamos el fondo del juego.
@@ -162,9 +159,6 @@ class Escena_Juego(Normal):
 
 class Escena_Menu(Normal):
     """ Escena del menú del juego. """
-
-    def __init__(self):
-        super(Escena_Menu, self).__init__()
 
     def iniciar_juego(self):
         pilas.cambiar_escena(Escena_Juego())
