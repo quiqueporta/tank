@@ -21,8 +21,7 @@ class Escena_Menu(Normal):
         pilas.cambiar_escena(Escena_Juego())
 
     def salir_del_juego(self):
-        import sys
-        sys.exit(0)
+        pilas.terminar()
 
     def iniciar(self):
         # Cargamos el fondo del juego.
